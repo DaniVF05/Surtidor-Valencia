@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — Surtidor Valencia</title>
+  <meta name="description" content="Panel de control del sistema de gestión de surtidores Valencia." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+<div class="app">
+
+  <!-- ── Sidebar ─────────────────────────────────────────── -->
+  <aside class="sidebar">
+    <div class="sidebar__brand">
+      <div class="sidebar__brand-icon">⛽</div>
+      <div>
+        <div class="sidebar__brand-name">Surtidor Valencia</div>
+        <div class="sidebar__brand-sub">Panel de Control</div>
+      </div>
+    </div>
+
+    <nav class="sidebar__nav">
+      <div class="nav-section">
+        <div class="nav-section__title">Principal</div>
+        <div class="nav-item active" data-page="dashboard" id="nav-dashboard">
+          <span class="nav-item__icon">📊</span> Dashboard
+        </div>
+        <div class="nav-item" data-page="surtidores" id="nav-surtidores">
+          <span class="nav-item__icon">⛽</span> Surtidores
+        </div>
+        <div class="nav-item" data-page="ventas" id="nav-ventas">
+          <span class="nav-item__icon">🧾</span> Ventas
+        </div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section__title">Administración</div>
+        <div class="nav-item" data-page="inventario" id="nav-inventario">
+          <span class="nav-item__icon">📦</span> Inventario
+        </div>
+        <div class="nav-item" data-page="empleados" id="nav-empleados">
+          <span class="nav-item__icon">👥</span> Empleados
+        </div>
+        <div class="nav-item" data-page="reportes" id="nav-reportes">
+          <span class="nav-item__icon">📈</span> Reportes
+        </div>
+      </div>
+    </nav>
+
+    <div class="sidebar__footer">
+      <div class="user-card">
+        <div class="user-avatar" id="userAvatar">A</div>
+        <div>
+          <div class="user-name"  id="userName">Cargando...</div>
+          <div class="user-role"  id="userRole">—</div>
+        </div>
+        <button class="user-logout" id="logoutBtn" title="Cerrar sesión">🚪</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ── Main ────────────────────────────────────────────── -->
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar__title" id="pageTitle">Dashboard</div>
+      <div class="topbar__datetime" id="clockDisplay"></div>
+    </header>
+
+    <div class="content">
+
+      <!-- ── DASHBOARD PAGE ──────────────────────────────── -->
+      <section class="page active" id="page-dashboard">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon stat-icon--amber">💰</div>
+            <div>
+              <div class="stat-value" id="stat-ingresos">$0</div>
+              <div class="stat-label">Ingresos Hoy</div>
+              <div class="stat-change stat-change--up">▲ Actualizado en vivo</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon stat-icon--blue">⛽</div>
+            <div>
+              <div class="stat-value" id="stat-litros">0 L</div>
+              <div class="stat-label">Litros Despachados Hoy</div>
+              <div class="stat-change stat-change--up">▲ Actualizado en vivo</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon stat-icon--green">✅</div>
+            <div>
+              <div class="stat-value" id="stat-transacciones">0</div>
+              <div class="stat-label">Transacciones Hoy</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon stat-icon--purple">🔧</div>
+            <div>
+              <div class="stat-value" id="stat-surtidores">0</div>
+              <div class="stat-label">Surtidores Activos</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <div class="section-header">
+              <div class="card__title">Últimas Ventas</div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Surtidor</th><th>Combustible</th><th>Litros</th><th>Total</th><th>Método</th>
+                  </tr>
+                </thead>
+                <tbody id="lastSalesBody">
+                  <tr><td colspan="5" style="text-align:center;color:var(--clr-text-muted)">Cargando...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="section-header">
+              <div class="card__title">Inventario Actual</div>
+            </div>
+            <div id="inventarioResumen"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── SURTIDORES PAGE ─────────────────────────────── -->
+      <section class="page" id="page-surtidores">
+        <div class="section-header">
+          <div class="section-title">Estado de Surtidores</div>
+          <button class="btn btn--primary btn--sm" id="btnNuevoSurtidor">+ Nuevo Surtidor</button>
+        </div>
+        <div class="surtidor-grid" id="surtidorGrid">
+          <p style="color:var(--clr-text-muted)">Cargando...</p>
+        </div>
+      </section>
+
+      <!-- ── VENTAS PAGE ─────────────────────────────────── -->
+      <section class="page" id="page-ventas">
+        <div class="section-header">
+          <div class="section-title">Registro de Ventas</div>
+          <button class="btn btn--primary btn--sm" id="btnNuevaVenta">+ Nueva Venta</button>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th><th>Fecha</th><th>Surtidor</th><th>Empleado</th>
+                  <th>Combustible</th><th>Litros</th><th>Precio/L</th><th>Total</th><th>Método</th>
+                </tr>
+              </thead>
+              <tbody id="ventasBody">
+                <tr><td colspan="9" style="text-align:center;color:var(--clr-text-muted)">Cargando...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── INVENTARIO PAGE ────────────────────────────── -->
+      <section class="page" id="page-inventario">
+        <div class="section-header">
+          <div class="section-title">Control de Inventario</div>
+        </div>
+        <div class="stats-grid" id="inventarioGrid">
+          <p style="color:var(--clr-text-muted)">Cargando...</p>
+        </div>
+      </section>
+
+      <!-- ── EMPLEADOS PAGE ─────────────────────────────── -->
+      <section class="page" id="page-empleados">
+        <div class="section-header">
+          <div class="section-title">Gestión de Empleados</div>
+          <button class="btn btn--primary btn--sm" id="btnNuevoEmpleado">+ Nuevo Empleado</button>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Nombre</th><th>Email</th><th>Rol</th><th>Estado</th></tr>
+              </thead>
+              <tbody id="empleadosBody">
+                <tr><td colspan="4" style="text-align:center;color:var(--clr-text-muted)">Cargando...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── REPORTES PAGE ──────────────────────────────── -->
+      <section class="page" id="page-reportes">
+        <div class="section-header">
+          <div class="section-title">Reportes y Estadísticas</div>
+        </div>
+        <div class="card">
+          <p style="color:var(--clr-text-muted);text-align:center;padding:40px">
+            📊 Módulo de reportes en desarrollo.<br>
+            Pronto disponible con gráficos y exportación PDF/Excel.
+          </p>
+        </div>
+      </section>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<script src="js/dashboard.js"></script>
+</body>
+</html>
