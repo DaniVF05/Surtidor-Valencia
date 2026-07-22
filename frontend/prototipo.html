@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>El Surtidor Cochabambino — Prototipo UI</title>
+<meta name="description" content="Sistema Digital de Control y Gestión para Estación de Servicio. Prototipo de interfaz de usuario." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+<style>
+/* ══════════════════════════════════════════════════
+   DESIGN SYSTEM — El Surtidor Cochabambino
+   ══════════════════════════════════════════════════ */
+:root {
+  --bg:        #0a0e1a;
+  --surface:   #111827;
+  --surface2:  #1a2235;
+  --border:    rgba(255,255,255,.08);
+  --amber:     #f59e0b;
+  --amber-d:   #d97706;
+  --amber-g:   rgba(245,158,11,.2);
+  --blue:      #3b82f6;
+  --green:     #22c55e;
+  --red:       #ef4444;
+  --purple:    #8b5cf6;
+  --text:      #f1f5f9;
+  --muted:     #94a3b8;
+  --mono:      'JetBrains Mono', monospace;
+  --font:      'Inter', system-ui, sans-serif;
+  --r-sm: 8px; --r-md: 14px; --r-lg: 20px; --r-xl: 28px;
+  --tr: all .25s cubic-bezier(.4,0,.2,1);
+  --shadow: 0 25px 50px rgba(0,0,0,.5);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased;}
+button{cursor:pointer;font-family:inherit;border:none;background:none;}
+a{color:var(--amber);text-decoration:none;}
+
+/* ── Layout ── */
+.app{display:flex;min-height:100vh;}
+
+/* ── Sidebar ── */
+.sidebar{
+  width:252px;flex-shrink:0;background:var(--surface);
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+  position:sticky;top:0;height:100vh;overflow-y:auto;
+}
+.sidebar-brand{
+  display:flex;align-items:center;gap:12px;
+  padding:22px 18px;border-bottom:1px solid var(--border);
+}
+.brand-icon{
+  width:44px;height:44px;border-radius:var(--r-sm);flex-shrink:0;
+  background:linear-gradient(135deg,var(--amber),#fbbf24);
+  display:grid;place-items:center;font-size:1.3rem;
+  box-shadow:0 0 20px var(--amber-g);
+}
+.brand-name{font-size:.95rem;font-weight:800;line-height:1.2;}
+.brand-sub{font-size:.68rem;color:var(--muted);margin-top:2px;}
+
+.sidebar-nav{flex:1;padding:14px 10px;}
+.nav-section{margin-bottom:6px;}
+.nav-section-title{font-size:.68rem;font-weight:700;letter-spacing:.08em;color:var(--muted);padding:8px 10px;text-transform:uppercase;}
+.nav-item{
+  display:flex;align-items:center;gap:11px;
+  padding:10px 12px;border-radius:var(--r-sm);
+  color:var(--muted);font-size:.88rem;font-weight:500;
+  transition:var(--tr);cursor:pointer;user-select:none;border-left:3px solid transparent;
+}
+.nav-item:hover{background:rgba(255,255,255,.06);color:var(--text);}
+.nav-item.active{background:rgba(245,158,11,.12);color:var(--amber);border-left-color:var(--amber);}
+.nav-icon{font-size:1rem;width:18px;text-align:center;}
+
+.sidebar-footer{padding:14px 10px;border-top:1px solid var(--border);}
+.user-row{display:flex;align-items:center;gap:10px;padding:10px;border-radius:var(--r-sm);background:rgba(255,255,255,.04);}
+.avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--amber),#fbbf24);display:grid;place-items:center;font-size:.85rem;font-weight:700;color:#0a0e1a;flex-shrink:0;}
+.user-name{font-size:.82rem;font-weight:600;}
+.user-role{font-size:.7rem;color:var(--muted);}
+.logout-btn{margin-left:auto;opacity:.5;transition:var(--tr);font-size:1rem;}
+.logout-btn:hover{opacity:1;color:var(--red);}
+
+/* ── Main ── */
+.main{flex:1;overflow-x:hidden;display:flex;flex-direction:column;}
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 30px;background:var(--surface);
+  border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10;
+}
+.topbar-title{font-size:1.25rem;font-weight:700;}
+.topbar-right{display:flex;align-items:center;gap:16px;}
+.clock{font-size:.82rem;color:var(--muted);font-family:var(--mono);}
+.content{padding:26px 30px;flex:1;}
+
+/* ── Pages ── */
+.page{display:none;animation:fadeIn .3s ease both;}
+.page.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+/* ── Cards ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:22px;transition:var(--tr);}
+.card:hover{border-color:rgba(255,255,255,.14);}
+.card-title{font-size:.95rem;font-weight:700;margin-bottom:4px;}
+.card-sub{font-size:.78rem;color:var(--muted);}
+
+/* ── Stats grid ── */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:18px;margin-bottom:24px;}
+.stat-card{
+  background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-lg);
+  padding:20px;display:flex;align-items:flex-start;gap:14px;transition:var(--tr);
+}
+.stat-card:hover{transform:translateY(-3px);box-shadow:0 12px 30px rgba(0,0,0,.3);}
+.stat-ico{width:50px;height:50px;border-radius:var(--r-md);display:grid;place-items:center;font-size:1.3rem;flex-shrink:0;}
+.ico-amber{background:rgba(245,158,11,.15);}
+.ico-blue{background:rgba(59,130,246,.15);}
+.ico-green{background:rgba(34,197,94,.15);}
+.ico-purple{background:rgba(139,92,246,.15);}
+.ico-red{background:rgba(239,68,68,.15);}
+.stat-val{font-size:1.65rem;font-weight:800;line-height:1;}
+.stat-lbl{font-size:.76rem;color:var(--muted);margin-top:4px;}
+.stat-chg{font-size:.74rem;font-weight:600;margin-top:5px;}
+.up{color:var(--green);} .down{color:var(--red);}
+
+/* ── Grid ── */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;margin-bottom:24px;}
+
+/* ── Table ── */
+.tbl-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;}
+th{text-align:left;font-size:.73rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:9px 14px;border-bottom:1px solid var(--border);}
+td{padding:12px 14px;font-size:.87rem;border-bottom:1px solid rgba(255,255,255,.04);}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(255,255,255,.03);}
+
+/* ── Badge ── */
+.badge{display:inline-block;padding:3px 9px;border-radius:99px;font-size:.7rem;font-weight:600;}
+.b-green{background:rgba(34,197,94,.15);color:#86efac;}
+.b-red{background:rgba(239,68,68,.15);color:#fca5a5;}
+.b-yellow{background:rgba(245,158,11,.15);color:#fde68a;}
+.b-blue{background:rgba(59,130,246,.15);color:#93c5fd;}
+.b-purple{background:rgba(139,92,246,.15);color:#c4b5fd;}
+
+/* ── Button ── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 20px;border-radius:var(--r-md);font-size:.9rem;font-weight:600;transition:var(--tr);}
+.btn-amber{background:linear-gradient(135deg,var(--amber),#fbbf24);color:#0a0e1a;box-shadow:0 4px 18px var(--amber-g);}
+.btn-amber:hover{transform:translateY(-2px);box-shadow:0 8px 28px var(--amber-g);}
+.btn-ghost{background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--text);}
+.btn-ghost:hover{background:rgba(255,255,255,.1);}
+.btn-sm{padding:7px 14px;font-size:.8rem;border-radius:var(--r-sm);}
+.btn-danger{background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#fca5a5;}
+.btn-success{background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);color:#86efac;}
+
+/* ── Section header ── */
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
+.sec-title{font-size:1rem;font-weight:700;}
+
+/* ── Progress bar ── */
+.prog-wrap{background:rgba(255,255,255,.08);border-radius:99px;height:8px;overflow:hidden;}
+.prog-bar{height:100%;border-radius:99px;transition:width .8s cubic-bezier(.4,0,.2,1);}
+
+/* ── Mono display (binary) ── */
+.mono{font-family:var(--mono);font-size:.82rem;background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:2px 8px;color:var(--green);}
+.mono-big{font-family:var(--mono);font-size:1.1rem;color:var(--green);background:rgba(0,0,0,.5);border:1px solid rgba(34,197,94,.3);border-radius:8px;padding:6px 12px;display:inline-block;}
+
+/* ═══════════════════════════════════════════════
+   SURTIDORES
+   ═══════════════════════════════════════════════ */
+.pump-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:18px;}
+.pump-card{
+  border-radius:var(--r-lg);padding:22px;text-align:center;
+  border:2px solid transparent;transition:var(--tr);cursor:default;position:relative;overflow:hidden;
+}
+.pump-card:hover{transform:translateY(-5px);}
+.pump-card::before{content:'';position:absolute;inset:0;opacity:0;transition:var(--tr);}
+.pump-card:hover::before{opacity:1;}
+.pump-activo{background:rgba(34,197,94,.07);border-color:rgba(34,197,94,.3);}
+.pump-inactivo{background:rgba(239,68,68,.07);border-color:rgba(239,68,68,.3);}
+.pump-mantenimiento{background:rgba(245,158,11,.07);border-color:rgba(245,158,11,.3);}
+.pump-num{font-size:2.8rem;font-weight:900;line-height:1;}
+.pump-tipo{font-size:.8rem;color:var(--muted);margin-top:4px;}
+.pump-gauge{
+  width:90px;height:90px;border-radius:50%;margin:14px auto;
+  background:conic-gradient(var(--green) 0% 75%, rgba(255,255,255,.08) 75% 100%);
+  display:grid;place-items:center;position:relative;
+}
+.pump-gauge::before{content:'';position:absolute;width:66px;height:66px;border-radius:50%;background:var(--surface2);}
+.pump-pct{position:relative;font-size:1.1rem;font-weight:700;}
+.pump-binary{margin:10px auto;font-family:var(--mono);font-size:.82rem;color:var(--green);background:rgba(0,0,0,.4);border:1px solid rgba(34,197,94,.3);border-radius:6px;padding:4px 12px;display:inline-block;}
+.led{width:12px;height:12px;border-radius:50%;display:inline-block;margin-right:6px;animation:pulse-led 1.5s ease-in-out infinite;}
+.led-green{background:var(--green);box-shadow:0 0 10px var(--green);}
+.led-yellow{background:#fbbf24;box-shadow:0 0 10px #fbbf24;}
+.led-red{background:var(--red);box-shadow:0 0 14px var(--red);}
+.led-off{background:rgba(255,255,255,.15);box-shadow:none;animation:none;}
+@keyframes pulse-led{0%,100%{opacity:1;}50%{opacity:.4;}}
+
+/* ═══════════════════════════════════════════════
+   ALERTAS
+   ═══════════════════════════════════════════════ */
+.alert-panel{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px;}
+.kmap{
+  background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-lg);padding:22px;
+}
+.kmap-title{font-size:.9rem;font-weight:700;margin-bottom:14px;color:var(--amber);}
+.kmap-grid{display:grid;grid-template-columns:40px 1fr 1fr;grid-template-rows:40px 1fr 1fr;gap:4px;max-width:220px;}
+.kmap-hdr{display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:.78rem;color:var(--muted);background:rgba(255,255,255,.04);border-radius:6px;}
+.kmap-cell{display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:1rem;font-weight:700;border-radius:6px;padding:8px;}
+.kmap-0{background:rgba(255,255,255,.04);color:var(--muted);}
+.kmap-1{background:rgba(245,158,11,.15);color:var(--amber);}
+.kmap-1-sel{background:rgba(245,158,11,.3);color:var(--amber);box-shadow:0 0 0 2px var(--amber);}
+
+.truth-table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:.85rem;}
+.truth-table th,.truth-table td{padding:8px 14px;border:1px solid var(--border);text-align:center;}
+.truth-table th{background:rgba(255,255,255,.06);color:var(--muted);}
+.truth-table .out-1{color:var(--amber);font-weight:700;}
+.truth-table .out-0{color:var(--muted);}
+
+.logic-diagram{
+  background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-lg);
+  padding:22px;grid-column:1/-1;
+}
+.bool-expr{
+  font-family:var(--mono);font-size:1.2rem;color:var(--amber);
+  background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);
+  border-radius:var(--r-sm);padding:12px 20px;text-align:center;margin-top:14px;
+}
+.gate{display:inline-block;padding:6px 14px;border-radius:6px;font-family:var(--mono);font-size:.8rem;font-weight:600;margin:4px;}
+.gate-and{background:rgba(59,130,246,.2);color:#93c5fd;border:1px solid rgba(59,130,246,.3);}
+.gate-or{background:rgba(34,197,94,.2);color:#86efac;border:1px solid rgba(34,197,94,.3);}
+.gate-not{background:rgba(239,68,68,.2);color:#fca5a5;border:1px solid rgba(239,68,68,.3);}
+
+.alert-item{
+  display:flex;align-items:center;gap:14px;padding:14px;
+  border-radius:var(--r-md);margin-bottom:10px;border:1px solid;
+  transition:var(--tr);
+}
+.alert-critical{background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.3);}
+.alert-warning{background:rgba(245,158,11,.08);border-color:rgba(245,158,11,.3);}
+.alert-ok{background:rgba(34,197,94,.08);border-color:rgba(34,197,94,.3);}
+.alert-msg{flex:1;font-size:.88rem;}
+.alert-time{font-size:.75rem;color:var(--muted);font-family:var(--mono);}
+
+/* ═══════════════════════════════════════════════
+   VENTAS FORM
+   ═══════════════════════════════════════════════ */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.form-group{display:flex;flex-direction:column;gap:7px;}
+.form-label{font-size:.78rem;font-weight:600;color:var(--muted);letter-spacing:.03em;}
+.form-input,.form-select{
+  width:100%;padding:11px 14px;
+  background:rgba(255,255,255,.06);border:1px solid var(--border);
+  border-radius:var(--r-sm);color:var(--text);font-size:.9rem;
+  transition:var(--tr);outline:none;font-family:inherit;
+}
+.form-input:focus,.form-select:focus{border-color:var(--amber);box-shadow:0 0 0 3px var(--amber-g);}
+.form-select option{background:var(--surface);}
+.total-display{
+  font-family:var(--mono);font-size:1.5rem;font-weight:700;color:var(--amber);
+  background:rgba(245,158,11,.08);border:2px solid rgba(245,158,11,.3);
+  border-radius:var(--r-md);padding:14px;text-align:center;
+}
+
+/* ═══════════════════════════════════════════════
+   REPORTES / CHARTS (CSS only)
+   ═══════════════════════════════════════════════ */
+.chart-bars{display:flex;align-items:flex-end;gap:12px;height:160px;padding-bottom:8px;margin-top:14px;}
+.chart-bar-wrap{display:flex;flex-direction:column;align-items:center;flex:1;}
+.chart-bar{width:100%;border-radius:6px 6px 0 0;transition:height .8s cubic-bezier(.4,0,.2,1);min-height:4px;position:relative;}
+.chart-bar:hover{filter:brightness(1.2);}
+.chart-bar::after{content:attr(data-val);position:absolute;top:-22px;left:50%;transform:translateX(-50%);font-size:.68rem;color:var(--muted);white-space:nowrap;}
+.chart-lbl{font-size:.68rem;color:var(--muted);margin-top:6px;text-align:center;}
+
+.donut-wrap{display:flex;align-items:center;gap:24px;}
+.donut{width:110px;height:110px;border-radius:50%;background:conic-gradient(var(--amber) 0% 55%, var(--blue) 55% 80%, var(--green) 80% 100%);position:relative;flex-shrink:0;}
+.donut::after{content:'';position:absolute;width:70px;height:70px;background:var(--surface);border-radius:50%;top:50%;left:50%;transform:translate(-50%,-50%);}
+.donut-legend{display:flex;flex-direction:column;gap:8px;}
+.donut-item{display:flex;align-items:center;gap:8px;font-size:.82rem;}
+.donut-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+
+.decoder-table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:.82rem;margin-top:12px;}
+.decoder-table th,.decoder-table td{padding:8px 12px;border:1px solid var(--border);text-align:center;}
+.decoder-table th{background:rgba(255,255,255,.06);color:var(--muted);}
+.decoder-table tr:nth-child(even) td{background:rgba(255,255,255,.02);}
+
+/* ═══════════════════════════════════════════════
+   INVENTARIO
+   ═══════════════════════════════════════════════ */
+.inv-card{
+  background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-lg);
+  padding:20px;transition:var(--tr);
+}
+.inv-card:hover{transform:translateY(-3px);}
+.inv-type{font-size:1rem;font-weight:700;margin-bottom:6px;}
+.inv-vals{display:flex;justify-content:space-between;font-size:.78rem;color:var(--muted);margin-bottom:8px;}
+.inv-stock{font-size:1.5rem;font-weight:800;margin-bottom:4px;}
+
+/* ═══════════════════════════════════════════════
+   LOGIN PAGE
+   ═══════════════════════════════════════════════ */
+.login-screen{
+  position:fixed;inset:0;z-index:999;
+  background:radial-gradient(ellipse at 20% 50%,#1a1f35 0%,var(--bg) 70%);
+  display:grid;place-items:center;
+}
+.orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:.3;animation:float 8s ease-in-out infinite;}
+.orb1{width:500px;height:500px;top:-150px;left:-150px;background:radial-gradient(circle,var(--amber),transparent 70%);animation-delay:0s;}
+.orb2{width:350px;height:350px;bottom:-80px;right:-80px;background:radial-gradient(circle,var(--blue),transparent 70%);animation-delay:-3s;}
+.orb3{width:250px;height:250px;top:40%;left:55%;background:radial-gradient(circle,var(--purple),transparent 70%);animation-delay:-5s;}
+@keyframes float{0%,100%{transform:translateY(0) scale(1);}50%{transform:translateY(-25px) scale(1.05);}}
+.login-card{
+  background:rgba(255,255,255,.04);backdrop-filter:blur(20px);
+  border:1px solid rgba(255,255,255,.1);border-radius:var(--r-xl);
+  padding:46px 38px 32px;width:420px;
+  box-shadow:var(--shadow);animation:slideUp .6s cubic-bezier(.16,1,.3,1) both;
+  position:relative;z-index:1;
+}
+@keyframes slideUp{from{opacity:0;transform:translateY(28px);}to{opacity:1;transform:translateY(0);}}
+.login-logo{width:70px;height:70px;border-radius:50%;background:linear-gradient(135deg,var(--amber),#fbbf24);display:grid;place-items:center;font-size:1.9rem;margin:0 auto 16px;box-shadow:0 0 30px var(--amber-g);}
+.login-title{font-size:1.6rem;font-weight:800;text-align:center;}
+.login-sub{color:var(--muted);font-size:.85rem;text-align:center;margin-top:4px;margin-bottom:28px;}
+.login-form{display:flex;flex-direction:column;gap:16px;}
+.inp-wrap{position:relative;}
+.inp-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:.9rem;opacity:.45;}
+.login-input{width:100%;padding:13px 13px 13px 40px;background:rgba(255,255,255,.07);border:1px solid var(--border);border-radius:var(--r-md);color:var(--text);font-size:.95rem;outline:none;transition:var(--tr);font-family:inherit;}
+.login-input:focus{border-color:var(--amber);background:rgba(245,158,11,.06);box-shadow:0 0 0 3px var(--amber-g);}
+.login-btn{width:100%;padding:14px;background:linear-gradient(135deg,var(--amber),#fbbf24);color:#0a0e1a;font-size:1rem;font-weight:700;border-radius:var(--r-md);transition:var(--tr);margin-top:6px;}
+.login-btn:hover{transform:translateY(-2px);box-shadow:0 8px 28px var(--amber-g);}
+.login-foot{text-align:center;color:var(--muted);font-size:.72rem;margin-top:22px;}
+.enter-app{display:block;text-align:center;margin-top:12px;color:var(--amber);font-size:.8rem;font-weight:600;cursor:pointer;}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════ LOGIN SCREEN ═══════════════════════════ -->
+<div class="login-screen" id="loginScreen">
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+  <div class="login-card">
+    <div class="login-logo">⛽</div>
+    <h1 class="login-title">El Surtidor Cochabambino</h1>
+    <p class="login-sub">Sistema Digital de Control y Gestión</p>
+    <form class="login-form" onsubmit="enterApp(event)">
+      <div class="form-group">
+        <label class="form-label">Correo Electrónico</label>
+        <div class="inp-wrap">
+          <span class="inp-icon">✉</span>
+          <input class="login-input" type="email" placeholder="admin@surtidor.com" value="admin@surtidor.com" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Contraseña</label>
+        <div class="inp-wrap">
+          <span class="inp-icon">🔒</span>
+          <input class="login-input" type="password" placeholder="••••••••" value="Admin1234!" />
+        </div>
+      </div>
+      <button class="login-btn" type="submit">Ingresar al Sistema</button>
+    </form>
+    <p class="login-foot">© 2026 El Surtidor Cochabambino — Todos los derechos reservados</p>
+    <span class="enter-app" onclick="enterApp(event)">→ Ver Prototipo completo</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ APP ═══════════════════════════ -->
+<div class="app" id="appShell" style="display:none">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon">⛽</div>
+      <div>
+        <div class="brand-name">Surtidor CB</div>
+        <div class="brand-sub">Sistema Digital v1.0</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">
+        <div class="nav-section-title">Principal</div>
+        <div class="nav-item active" onclick="nav('dashboard',this)"><span class="nav-icon">📊</span>Dashboard</div>
+        <div class="nav-item" onclick="nav('surtidores',this)"><span class="nav-icon">⛽</span>Surtidores</div>
+        <div class="nav-item" onclick="nav('ventas',this)"><span class="nav-icon">🧾</span>Ventas</div>
+        <div class="nav-item" onclick="nav('alertas',this)"><span class="nav-icon">🚨</span>Alertas</div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Administración</div>
+        <div class="nav-item" onclick="nav('inventario',this)"><span class="nav-icon">📦</span>Inventario</div>
+        <div class="nav-item" onclick="nav('reportes',this)"><span class="nav-icon">📈</span>Reportes</div>
+        <div class="nav-item" onclick="nav('empleados',this)"><span class="nav-icon">👥</span>Empleados</div>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-row">
+        <div class="avatar">A</div>
+        <div>
+          <div class="user-name">Admin Principal</div>
+          <div class="user-role">Administrador</div>
+        </div>
+        <button class="logout-btn" onclick="logout()" title="Salir">🚪</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-title" id="pageTitle">Dashboard</div>
+      <div class="topbar-right">
+        <div class="clock" id="clock"></div>
+        <span class="badge b-green"><span class="led led-green" style="width:8px;height:8px"></span>Sistema en línea</span>
+      </div>
+    </header>
+    <div class="content">
+
+      <!-- ═══════════ DASHBOARD ═══════════ -->
+      <section class="page active" id="pg-dashboard">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-ico ico-amber">💰</div>
+            <div><div class="stat-val">Bs 8,240</div><div class="stat-lbl">Ingresos Hoy</div><div class="stat-chg up">▲ +12% vs ayer</div></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-ico ico-blue">⛽</div>
+            <div><div class="stat-val">1,840 L</div><div class="stat-lbl">Litros Despachados</div><div class="stat-chg up">▲ +8% vs ayer</div></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-ico ico-green">✅</div>
+            <div><div class="stat-val">127</div><div class="stat-lbl">Transacciones Hoy</div><div class="stat-chg up">▲ +5 vs ayer</div></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-ico ico-purple">🔧</div>
+            <div><div class="stat-val">3 / 4</div><div class="stat-lbl">Surtidores Activos</div><div class="stat-chg down">▼ 1 en mantenimiento</div></div>
+          </div>
+        </div>
+        <div class="g2">
+          <div class="card">
+            <div class="sec-hdr"><div class="card-title">Últimas Ventas</div></div>
+            <div class="tbl-wrap">
+              <table>
+                <thead><tr><th>Surtidor</th><th>Combustible</th><th>Litros</th><th>Total</th><th>Método</th></tr></thead>
+                <tbody>
+                  <tr><td>#1</td><td>Gasolina 91</td><td>30.5 L</td><td>Bs 122</td><td><span class="badge b-blue">Efectivo</span></td></tr>
+                  <tr><td>#2</td><td>Gasolina 95</td><td>20.0 L</td><td>Bs 98</td><td><span class="badge b-green">Tarjeta</span></td></tr>
+                  <tr><td>#3</td><td>Gasoil</td><td>50.0 L</td><td>Bs 175</td><td><span class="badge b-blue">Efectivo</span></td></tr>
+                  <tr><td>#1</td><td>GLP</td><td>15.2 L</td><td>Bs 45.6</td><td><span class="badge b-purple">Transfer.</span></td></tr>
+                  <tr><td>#2</td><td>Gasolina 91</td><td>40.0 L</td><td>Bs 160</td><td><span class="badge b-blue">Efectivo</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title" style="margin-bottom:16px">Inventario Actual</div>
+            <div id="inv-dash"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════ SURTIDORES ═══════════ -->
+      <section class="page" id="pg-surtidores">
+        <div class="sec-hdr">
+          <div class="sec-title">Estado de Surtidores — Sensores Binarios</div>
+          <button class="btn btn-amber btn-sm">+ Nuevo Surtidor</button>
+        </div>
+        <!-- Binary legend -->
+        <div class="card" style="margin-bottom:20px;display:flex;gap:24px;align-items:center;flex-wrap:wrap;">
+          <div style="font-size:.82rem;font-weight:600;color:var(--muted)">Codificación nivel (2 bits):</div>
+          <div style="display:flex;gap:12px;flex-wrap:wrap">
+            <span class="mono">00 → Vacío (0%)</span>
+            <span class="mono">01 → Bajo (25%)</span>
+            <span class="mono">10 → Medio (50%)</span>
+            <span class="mono">11 → Lleno (100%)</span>
+          </div>
+        </div>
+        <div class="pump-grid" id="pump-grid"></div>
+      </section>
+
+      <!-- ═══════════ VENTAS ═══════════ -->
+      <section class="page" id="pg-ventas">
+        <div class="sec-hdr"><div class="sec-title">Registro de Ventas</div></div>
+        <div class="g2">
+          <div class="card">
+            <div class="card-title" style="margin-bottom:18px">➕ Nueva Venta</div>
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">Surtidor</label>
+                <select class="form-select" id="v-surtidor" onchange="calcTotal()">
+                  <option>#1 — Gasolina 91</option>
+                  <option>#2 — Gasolina 95</option>
+                  <option>#3 — Gasoil</option>
+                  <option>#4 — GLP</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Tipo Combustible <span class="mono" style="font-size:.68rem" id="v-cod">00</span></label>
+                <select class="form-select" onchange="updateDecoder(this)">
+                  <option value="00">Gasolina 91</option>
+                  <option value="01">Gasolina 95</option>
+                  <option value="10">Gasoil</option>
+                  <option value="11">GLP</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Litros</label>
+                <input class="form-input" type="number" id="v-litros" placeholder="0.000" step="0.001" oninput="calcTotal()" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Precio / Litro (Bs)</label>
+                <input class="form-input" type="number" id="v-precio" placeholder="0.00" step="0.01" oninput="calcTotal()" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Método de Pago</label>
+                <select class="form-select">
+                  <option>Efectivo</option><option>Tarjeta</option><option>Transferencia</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Empleado</label>
+                <select class="form-select">
+                  <option>Carlos Mamani</option><option>Ana Quispe</option><option>Luis Flores</option>
+                </select>
+              </div>
+            </div>
+            <div style="margin-top:16px">
+              <div class="form-label" style="margin-bottom:8px">Total a Cobrar</div>
+              <div class="total-display" id="v-total">Bs 0.00</div>
+              <div style="margin-top:8px;font-size:.72rem;color:var(--muted);font-family:var(--mono)" id="v-binary-calc">Aritmética binaria: 0 × 0 = 0</div>
+            </div>
+            <button class="btn btn-amber" style="width:100%;margin-top:16px">Registrar Venta</button>
+          </div>
+          <div class="card">
+            <div class="card-title" style="margin-bottom:14px">Ventas del Día</div>
+            <div class="tbl-wrap">
+              <table>
+                <thead><tr><th>#</th><th>Hora</th><th>Surt.</th><th>Comb.</th><th>Litros</th><th>Total</th></tr></thead>
+                <tbody>
+                  <tr><td>1</td><td style="font-family:var(--mono)">08:15</td><td>#1</td><td>G91</td><td>30.5</td><td>Bs 122</td></tr>
+                  <tr><td>2</td><td style="font-family:var(--mono)">08:42</td><td>#2</td><td>G95</td><td>20.0</td><td>Bs 98</td></tr>
+                  <tr><td>3</td><td style="font-family:var(--mono)">09:10</td><td>#3</td><td>Gasoil</td><td>50.0</td><td>Bs 175</td></tr>
+                  <tr><td>4</td><td style="font-family:var(--mono)">09:33</td><td>#4</td><td>GLP</td><td>15.2</td><td>Bs 45.6</td></tr>
+                  <tr><td>5</td><td style="font-family:var(--mono)">10:05</td><td>#1</td><td>G91</td><td>40.0</td><td>Bs 160</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════ ALERTAS ═══════════ -->
+      <section class="page" id="pg-alertas">
+        <div class="sec-hdr"><div class="sec-title">Sistema de Alertas — Compuertas Lógicas & Mapas de Karnaugh</div></div>
+
+        <!-- LEDs en tiempo real -->
+        <div class="stats-grid" style="margin-bottom:20px">
+          <div class="stat-card" style="border-color:rgba(34,197,94,.3)">
+            <div class="stat-ico ico-green">🟢</div>
+            <div>
+              <div style="font-size:1rem;font-weight:700">NORMAL</div>
+              <div style="font-size:.78rem;color:var(--muted);margin-top:3px">Surtidores #1, #2</div>
+              <div style="margin-top:8px"><span class="led led-green"></span><span class="led led-off" style="background:var(--green);opacity:.3"></span></div>
+            </div>
+          </div>
+          <div class="stat-card" style="border-color:rgba(245,158,11,.4)">
+            <div class="stat-ico ico-amber">🟡</div>
+            <div>
+              <div style="font-size:1rem;font-weight:700;color:var(--amber)">NIVEL BAJO</div>
+              <div style="font-size:.78rem;color:var(--muted);margin-top:3px">Surtidor #3 — Gasoil</div>
+              <div style="margin-top:8px"><span class="led led-yellow"></span><small style="font-family:var(--mono);font-size:.7rem;color:var(--muted)">01 = 25%</small></div>
+            </div>
+          </div>
+          <div class="stat-card" style="border-color:rgba(239,68,68,.5)">
+            <div class="stat-ico ico-red">🔴</div>
+            <div>
+              <div style="font-size:1rem;font-weight:700;color:var(--red)">NIVEL CRÍTICO</div>
+              <div style="font-size:.78rem;color:var(--muted);margin-top:3px">Surtidor #4 — GLP</div>
+              <div style="margin-top:8px"><span class="led led-red"></span><small style="font-family:var(--mono);font-size:.7rem;color:var(--muted)">00 = 0%</small></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="alert-panel">
+          <!-- Tabla de Verdad -->
+          <div class="kmap">
+            <div class="kmap-title">📋 Tabla de Verdad — Sistema de Alertas</div>
+            <table class="truth-table">
+              <thead>
+                <tr><th>A (bit₁)</th><th>B (bit₀)</th><th>Nivel %</th><th>Alerta (F)</th><th>LED</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>0</td><td>0</td><td>0% (Vacío)</td><td class="out-1">1</td><td>🔴 Crítico</td></tr>
+                <tr><td>0</td><td>1</td><td>25% (Bajo)</td><td class="out-1">1</td><td>🟡 Bajo</td></tr>
+                <tr><td>1</td><td>0</td><td>50% (Medio)</td><td class="out-0">0</td><td>🟢 OK</td></tr>
+                <tr><td>1</td><td>1</td><td>100% (Lleno)</td><td class="out-0">0</td><td>🟢 OK</td></tr>
+              </tbody>
+            </table>
+            <div class="bool-expr">F = A' (Alerta si bit₁ = 0)</div>
+          </div>
+
+          <!-- Mapa de Karnaugh -->
+          <div class="kmap">
+            <div class="kmap-title">🗺 Mapa de Karnaugh (2 variables)</div>
+            <div style="display:flex;gap:24px;align-items:flex-start">
+              <div>
+                <div style="font-size:.78rem;color:var(--muted);margin-bottom:8px;font-family:var(--mono)">A\B → 0 &nbsp; 1</div>
+                <div class="kmap-grid">
+                  <div class="kmap-hdr"></div>
+                  <div class="kmap-hdr">B=0</div>
+                  <div class="kmap-hdr">B=1</div>
+                  <div class="kmap-hdr">A=0</div>
+                  <div class="kmap-cell kmap-1-sel">1</div>
+                  <div class="kmap-cell kmap-1-sel">1</div>
+                  <div class="kmap-hdr">A=1</div>
+                  <div class="kmap-cell kmap-0">0</div>
+                  <div class="kmap-cell kmap-0">0</div>
+                </div>
+                <div style="margin-top:10px;font-size:.72rem;color:var(--amber);font-family:var(--mono)">Grupo: A'B' + A'B = A'</div>
+              </div>
+              <div>
+                <div style="font-size:.78rem;color:var(--muted);margin-bottom:10px">Compuertas:</div>
+                <div><span class="gate gate-not">NOT</span> A → F</div>
+                <div style="margin-top:10px;font-size:.78rem;color:var(--muted)">Expresión mínima:</div>
+                <div class="bool-expr" style="font-size:.95rem;margin-top:6px">F = Ā</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Diagrama lógico -->
+          <div class="logic-diagram">
+            <div class="card-title">⚡ Diagrama de Compuertas Lógicas — Función de Alerta Completa</div>
+            <div style="margin-top:14px;display:flex;gap:16px;flex-wrap:wrap;align-items:center">
+              <div style="font-size:.85rem;font-family:var(--mono)">Entradas: <span style="color:var(--green)">A</span>, <span style="color:var(--blue)">B</span></div>
+              <span class="gate gate-not">NOT(A) → A'</span>
+              <span style="color:var(--muted)">→</span>
+              <span class="gate gate-and">AND(A', B') → m₀</span>
+              <span style="color:var(--muted)">→</span>
+              <span class="gate gate-or">OR(m₀, m₁) → F</span>
+              <span style="color:var(--muted)">→</span>
+              <span style="font-size:.85rem;font-weight:700;color:var(--red)">🔴 ALERTA</span>
+            </div>
+            <div class="bool-expr">F = A'B' + A'B = A'(B' + B) = <span style="color:var(--amber)">Ā</span> &nbsp;|&nbsp; Minterms: Σm(0,1)</div>
+            <div style="margin-top:12px;font-size:.78rem;color:var(--muted)">
+              La función se simplificó usando el Mapa de Karnaugh: los minterms m₀(00) y m₁(01) forman un grupo de 2 que simplifica a A'.
+            </div>
+          </div>
+        </div>
+
+        <!-- Historial alertas -->
+        <div class="card">
+          <div class="sec-hdr"><div class="sec-title">Historial de Alertas</div></div>
+          <div class="alert-item alert-critical">
+            <span class="led led-red"></span>
+            <div class="alert-msg"><strong>Surtidor #4 — GLP</strong>: Nivel crítico detectado. Sensor: <span class="mono">00</span> = 0%</div>
+            <div class="alert-time">08:32:14</div>
+          </div>
+          <div class="alert-item alert-warning">
+            <span class="led led-yellow"></span>
+            <div class="alert-msg"><strong>Surtidor #3 — Gasoil</strong>: Nivel bajo. Sensor: <span class="mono">01</span> = 25%</div>
+            <div class="alert-time">09:15:42</div>
+          </div>
+          <div class="alert-item alert-ok">
+            <span class="led led-green" style="animation:none"></span>
+            <div class="alert-msg"><strong>Surtidor #1 — Gasolina 91</strong>: Nivel normal. Sensor: <span class="mono">11</span> = 100%</div>
+            <div class="alert-time">10:00:00</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════ INVENTARIO ═══════════ -->
+      <section class="page" id="pg-inventario">
+        <div class="sec-hdr">
+          <div class="sec-title">Control de Inventario de Combustibles</div>
+          <button class="btn btn-amber btn-sm">+ Reabastecimiento</button>
+        </div>
+        <div class="stats-grid" id="inv-grid"></div>
+      </section>
+
+      <!-- ═══════════ REPORTES ═══════════ -->
+      <section class="page" id="pg-reportes">
+        <div class="sec-hdr">
+          <div class="sec-title">Reportes y Estadísticas</div>
+          <div style="display:flex;gap:10px">
+            <button class="btn btn-danger btn-sm">📄 Exportar PDF</button>
+            <button class="btn btn-success btn-sm">📊 Exportar Excel</button>
+          </div>
+        </div>
+        <div class="g2" style="margin-bottom:24px">
+          <div class="card">
+            <div class="card-title">Ventas por Tipo de Combustible (Litros)</div>
+            <div style="margin-bottom:10px;font-size:.78rem;color:var(--muted)">Decodificador: código binario → tipo</div>
+            <div class="chart-bars">
+              <div class="chart-bar-wrap">
+                <div class="chart-bar" style="height:120px;background:linear-gradient(180deg,var(--amber),#d97706)" data-val="840L"></div>
+                <div class="chart-lbl">G91<br><span class="mono" style="font-size:.65rem">00</span></div>
+              </div>
+              <div class="chart-bar-wrap">
+                <div class="chart-bar" style="height:80px;background:linear-gradient(180deg,var(--blue),#2563eb)" data-val="560L"></div>
+                <div class="chart-lbl">G95<br><span class="mono" style="font-size:.65rem">01</span></div>
+              </div>
+              <div class="chart-bar-wrap">
+                <div class="chart-bar" style="height:140px;background:linear-gradient(180deg,var(--green),#16a34a)" data-val="980L"></div>
+                <div class="chart-lbl">Gasoil<br><span class="mono" style="font-size:.65rem">10</span></div>
+              </div>
+              <div class="chart-bar-wrap">
+                <div class="chart-bar" style="height:55px;background:linear-gradient(180deg,var(--purple),#7c3aed)" data-val="385L"></div>
+                <div class="chart-lbl">GLP<br><span class="mono" style="font-size:.65rem">11</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title" style="margin-bottom:14px">Métodos de Pago</div>
+            <div class="donut-wrap">
+              <div class="donut"></div>
+              <div class="donut-legend">
+                <div class="donut-item"><div class="donut-dot" style="background:var(--amber)"></div><span>Efectivo 55%</span></div>
+                <div class="donut-item"><div class="donut-dot" style="background:var(--blue)"></div><span>Tarjeta 25%</span></div>
+                <div class="donut-item"><div class="donut-dot" style="background:var(--green)"></div><span>Transferencia 20%</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Decoder table -->
+        <div class="card">
+          <div class="card-title" style="margin-bottom:12px">Tabla Decodificadora de Combustibles (2 bits → Tipo)</div>
+          <table class="decoder-table">
+            <thead><tr><th>A (bit₁)</th><th>B (bit₀)</th><th>Código</th><th>Tipo Combustible</th><th>Precio/L (Bs)</th><th>Litros Hoy</th><th>Ingreso</th></tr></thead>
+            <tbody>
+              <tr><td>0</td><td>0</td><td><span class="mono">00</span></td><td>Gasolina 91</td><td>4.00</td><td>840</td><td>Bs 3,360</td></tr>
+              <tr><td>0</td><td>1</td><td><span class="mono">01</span></td><td>Gasolina 95</td><td>4.90</td><td>560</td><td>Bs 2,744</td></tr>
+              <tr><td>1</td><td>0</td><td><span class="mono">10</span></td><td>Gasoil</td><td>3.50</td><td>980</td><td>Bs 3,430</td></tr>
+              <tr><td>1</td><td>1</td><td><span class="mono">11</span></td><td>GLP</td><td>3.00</td><td>385</td><td>Bs 1,155</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ═══════════ EMPLEADOS ═══════════ -->
+      <section class="page" id="pg-empleados">
+        <div class="sec-hdr">
+          <div class="sec-title">Gestión de Empleados</div>
+          <button class="btn btn-amber btn-sm">+ Nuevo Empleado</button>
+        </div>
+        <div class="card">
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>Nombre</th><th>Email</th><th>Rol</th><th>Turno</th><th>Estado</th></tr></thead>
+              <tbody>
+                <tr><td>Carlos Mamani</td><td>cmamani@surtidor.com</td><td><span class="badge b-red">Admin</span></td><td>Mañana</td><td><span class="badge b-green">Activo</span></td></tr>
+                <tr><td>Ana Quispe</td><td>aquispe@surtidor.com</td><td><span class="badge b-yellow">Supervisor</span></td><td>Tarde</td><td><span class="badge b-green">Activo</span></td></tr>
+                <tr><td>Luis Flores</td><td>lflores@surtidor.com</td><td><span class="badge b-blue">Operador</span></td><td>Mañana</td><td><span class="badge b-green">Activo</span></td></tr>
+                <tr><td>María Condori</td><td>mcondori@surtidor.com</td><td><span class="badge b-blue">Operador</span></td><td>Noche</td><td><span class="badge b-red">Inactivo</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<script>
+// ── Data ─────────────────────────────────────────────────
+const fuels = [
+  {tipo:'Gasolina 91', cod:'00', stock:25000, min:3000, cap:50000, color:'#f59e0b'},
+  {tipo:'Gasolina 95', cod:'01', stock:18000, min:2000, cap:40000, color:'#3b82f6'},
+  {tipo:'Gasoil',      cod:'10', stock:7200,  min:5000, cap:60000, color:'#22c55e'},
+  {tipo:'GLP',         cod:'11', stock:800,   min:1000, cap:20000, color:'#8b5cf6'},
+];
+const pumps = [
+  {num:1, tipo:'Gasolina 91', estado:'activo',        bits:'11', pct:100, ventas:32},
+  {num:2, tipo:'Gasolina 95', estado:'activo',        bits:'10', pct:50,  ventas:18},
+  {num:3, tipo:'Gasoil',      estado:'activo',        bits:'01', pct:25,  ventas:12},
+  {num:4, tipo:'GLP',         estado:'mantenimiento', bits:'00', pct:0,   ventas:0 },
+];
+
+// ── Clock ─────────────────────────────────────────────────
+function updateClock(){
+  const n=new Date();
+  document.getElementById('clock').textContent=
+    n.toLocaleDateString('es-BO',{weekday:'short',day:'2-digit',month:'short'})
+    +' • '+n.toLocaleTimeString('es-BO');
+}
+updateClock(); setInterval(updateClock,1000);
+
+// ── Navigation ────────────────────────────────────────────
+const titles={dashboard:'Dashboard',surtidores:'Surtidores',ventas:'Ventas',alertas:'Alertas',inventario:'Inventario',reportes:'Reportes',empleados:'Empleados'};
+function nav(page,el){
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===`pg-${page}`));
+  document.getElementById('pageTitle').textContent=titles[page]||page;
+  if(page==='dashboard')renderInvDash();
+  if(page==='surtidores')renderPumps();
+  if(page==='inventario')renderInv();
+}
+
+// ── Inventory dashboard ───────────────────────────────────
+function renderInvDash(){
+  const el=document.getElementById('inv-dash');
+  el.innerHTML=fuels.map(f=>{
+    const pct=Math.round(f.stock/f.cap*100);
+    const col=pct<20?'#ef4444':pct<40?'#f59e0b':'#22c55e';
+    return`<div style="margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;font-size:.82rem;margin-bottom:5px">
+        <span>${f.tipo} <span class="mono">${f.cod}</span></span>
+        <span style="color:${col}">${f.stock.toLocaleString()} L (${pct}%)</span>
+      </div>
+      <div class="prog-wrap"><div class="prog-bar" style="width:${pct}%;background:${col}"></div></div>
+    </div>`;
+  }).join('');
+}
+
+// ── Pumps ─────────────────────────────────────────────────
+function renderPumps(){
+  const grid=document.getElementById('pump-grid');
+  grid.innerHTML=pumps.map(p=>{
+    const pct=p.pct;
+    const alertState=pct===0?'critical':pct<=25?'warning':'ok';
+    const gaugeColor=pct===0?'#ef4444':pct<=25?'#f59e0b':'#22c55e';
+    const ledCls=alertState==='critical'?'led-red':alertState==='warning'?'led-yellow':'led-green';
+    const borderCls=`pump-${p.estado}`;
+    const decoderMap={'11':'100%','10':'50%','01':'25%','00':'0%'};
+    return`<div class="pump-card ${borderCls}">
+      <div class="pump-num" style="color:${gaugeColor}">#${p.num}</div>
+      <div class="pump-tipo">${p.tipo}</div>
+      <div class="pump-gauge" style="background:conic-gradient(${gaugeColor} 0% ${pct}%, rgba(255,255,255,.08) ${pct}% 100%)">
+        <div class="pump-pct" style="color:${gaugeColor}">${pct}%</div>
+      </div>
+      <div class="pump-binary">Sensor: <strong>${p.bits}</strong> = ${decoderMap[p.bits]}</div>
+      <div style="margin-top:10px">
+        <span class="badge ${alertState==='ok'?'b-green':alertState==='warning'?'b-yellow':'b-red'}">
+          <span class="led ${ledCls}" style="width:8px;height:8px"></span>
+          ${alertState==='ok'?'Normal':alertState==='warning'?'Nivel Bajo':'Nivel Crítico'}
+        </span>
+      </div>
+      <div style="margin-top:8px;font-size:.72rem;color:var(--muted)">${p.ventas} ventas hoy</div>
+      ${p.estado!=='activo'?`<div style="margin-top:6px"><span class="badge b-yellow">${p.estado}</span></div>`:''}
+    </div>`;
+  }).join('');
+}
+
+// ── Inventory page ────────────────────────────────────────
+function renderInv(){
+  const grid=document.getElementById('inv-grid');
+  grid.innerHTML=fuels.map(f=>{
+    const pct=Math.round(f.stock/f.cap*100);
+    const col=pct<20?'#ef4444':pct<40?'#f59e0b':'#22c55e';
+    const alerta=f.stock<=f.min;
+    return`<div class="inv-card" style="${alerta?'border-color:rgba(239,68,68,.4)':''}">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div class="inv-type">${f.tipo}</div>
+        <span class="mono">${f.cod}</span>
+      </div>
+      <div class="inv-stock" style="color:${col}">${f.stock.toLocaleString()} L</div>
+      <div class="inv-vals"><span>Mín: ${f.min.toLocaleString()} L</span><span>Cap: ${f.cap.toLocaleString()} L</span></div>
+      <div class="prog-wrap"><div class="prog-bar" style="width:${pct}%;background:${col}"></div></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px">
+        <span class="badge ${alerta?'b-red':'b-green'}">${alerta?'⚠ Stock Bajo':'✓ Normal'}</span>
+        <button class="btn btn-amber btn-sm">+ Abastecer</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── Ventas calc ───────────────────────────────────────────
+function calcTotal(){
+  const l=parseFloat(document.getElementById('v-litros').value)||0;
+  const p=parseFloat(document.getElementById('v-precio').value)||0;
+  const t=(l*p);
+  document.getElementById('v-total').textContent=`Bs ${t.toFixed(2)}`;
+  document.getElementById('v-binary-calc').textContent=
+    `Aritmética binaria: ${l.toFixed(3)} × ${p.toFixed(2)} = ${t.toFixed(2)} | Bs (${(t>>>0).toString(2)} en binario)`;
+}
+function updateDecoder(sel){
+  document.getElementById('v-cod').textContent=sel.value;
+}
+
+// ── Login ─────────────────────────────────────────────────
+function enterApp(e){
+  e&&e.preventDefault();
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('appShell').style.display='flex';
+  renderInvDash(); renderPumps();
+}
+function logout(){
+  document.getElementById('appShell').style.display='none';
+  document.getElementById('loginScreen').style.display='grid';
+}
+
+// ── Init ──────────────────────────────────────────────────
+renderInvDash();
+</script>
+</body>
+</html>
