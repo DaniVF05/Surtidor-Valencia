@@ -1,12 +1,11 @@
 -- ═══════════════════════════════════════════════════════
---  Surtidor Valencia — Schema SQL
---  Base de datos: PostgreSQL 14+
+--  Surtidor Valencia — Schema SQL completo
+--  Base de datos: Supabase / PostgreSQL 14+
 -- ═══════════════════════════════════════════════════════
 
--- Extensiones
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- ─── Tabla: empleados ────────────────────────────────────
+-- ─── empleados ────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS empleados (
   id            SERIAL       PRIMARY KEY,
   nombre        VARCHAR(100) NOT NULL,
@@ -19,7 +18,7 @@ CREATE TABLE IF NOT EXISTS empleados (
   updated_at    TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );
 
--- ─── Tabla: surtidores ───────────────────────────────────
+-- ─── surtidores ───────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS surtidores (
   id               SERIAL       PRIMARY KEY,
   numero           INT          NOT NULL UNIQUE,
@@ -30,7 +29,7 @@ CREATE TABLE IF NOT EXISTS surtidores (
   updated_at       TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );
 
--- ─── Tabla: ventas ───────────────────────────────────────
+-- ─── ventas ───────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS ventas (
   id               SERIAL          PRIMARY KEY,
   surtidor_id      INT             NOT NULL REFERENCES surtidores(id),
@@ -41,10 +40,12 @@ CREATE TABLE IF NOT EXISTS ventas (
   tipo_combustible VARCHAR(50)     NOT NULL,
   metodo_pago      VARCHAR(30)     NOT NULL DEFAULT 'efectivo'
                    CHECK (metodo_pago IN ('efectivo','tarjeta','transferencia')),
+  metodo_pago_bits SMALLINT        NOT NULL DEFAULT 1,
+  id_binario       BIGINT,
   fecha            TIMESTAMPTZ     NOT NULL DEFAULT NOW()
 );
 
--- ─── Tabla: inventario ───────────────────────────────────
+-- ─── inventario ───────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS inventario (
   id               SERIAL          PRIMARY KEY,
   tipo_combustible VARCHAR(50)     NOT NULL UNIQUE,
@@ -54,19 +55,26 @@ CREATE TABLE IF NOT EXISTS inventario (
   updated_at       TIMESTAMPTZ     NOT NULL DEFAULT NOW()
 );
 
--- ─── Datos iniciales ─────────────────────────────────────
--- Admin por defecto: admin@surtidor.com / Admin1234!
+-- ─── alertas ──────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS alertas (
+  id           SERIAL      PRIMARY KEY,
+  surtidor_id  INT         REFERENCES surtidores(id) ON DELETE SET NULL,
+  tipo         VARCHAR(50) NOT NULL CHECK (tipo IN ('stock_bajo','surtidor_inactivo','mantenimiento','venta_alta','sistema')),
+  mensaje      TEXT        NOT NULL,
+  estado       VARCHAR(20) NOT NULL DEFAULT 'pendiente' CHECK (estado IN ('pendiente','revisada','resuelta')),
+  fecha        TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- ─── Datos iniciales ──────────────────────────────────────
 INSERT INTO empleados (nombre, email, password_hash, rol)
 VALUES ('Administrador', 'admin@surtidor.com',
         '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8.mQGjGKOiW4Sj5l.qu', 'admin')
 ON CONFLICT (email) DO NOTHING;
 
--- Surtidores de ejemplo
 INSERT INTO surtidores (numero, tipo_combustible) VALUES
   (1, 'Gasolina 91'), (2, 'Gasolina 95'), (3, 'Gasoil'), (4, 'GLP')
 ON CONFLICT (numero) DO NOTHING;
 
--- Inventario inicial
 INSERT INTO inventario (tipo_combustible, stock_actual, stock_minimo, capacidad_maxima) VALUES
   ('Gasolina 91', 25000, 3000, 50000),
   ('Gasolina 95', 18000, 2000, 40000),

@@ -1,7 +1,9 @@
-const express = require('express');
-const pool    = require('../config/db');
-const auth    = require('../middleware/auth');
-const router  = express.Router();
+const express  = require('express');
+const pool     = require('../config/db');
+const auth     = require('../middleware/auth');
+const router   = express.Router();
+const { calcularTotal, codificarMetodoPago, generarIdBinario } = require('../utils/binaryArithmetic');
+const { alertaSubject } = require('../patterns/AlertaObserver');
 
 // GET /api/ventas
 router.get('/', auth(), async (req, res) => {
@@ -12,9 +14,9 @@ router.get('/', auth(), async (req, res) => {
                JOIN empleados  e ON e.id = v.empleado_id
                WHERE 1=1`;
   const params = [];
-  if (desde)        { params.push(desde);        query += ` AND DATE(v.fecha) >= $${params.length}`; }
-  if (hasta)        { params.push(hasta);         query += ` AND DATE(v.fecha) <= $${params.length}`; }
-  if (surtidor_id)  { params.push(surtidor_id);   query += ` AND v.surtidor_id = $${params.length}`; }
+  if (desde)       { params.push(desde);       query += ` AND DATE(v.fecha) >= $${params.length}`; }
+  if (hasta)       { params.push(hasta);        query += ` AND DATE(v.fecha) <= $${params.length}`; }
+  if (surtidor_id) { params.push(surtidor_id);  query += ` AND v.surtidor_id = $${params.length}`; }
   query += ' ORDER BY v.fecha DESC LIMIT 500';
   try {
     const result = await pool.query(query, params);
@@ -24,16 +26,27 @@ router.get('/', auth(), async (req, res) => {
   }
 });
 
-// POST /api/ventas
+// POST /api/ventas — con aritmética binaria + Observer
 router.post('/', auth(), async (req, res) => {
   const { surtidor_id, litros, precio_unitario, tipo_combustible, metodo_pago } = req.body;
-  const total = litros * precio_unitario;
   try {
+    const total       = calcularTotal(parseFloat(litros), parseFloat(precio_unitario));
+    const metodoBits  = codificarMetodoPago(metodo_pago || 'efectivo');
+    const idBinario   = generarIdBinario(surtidor_id);
+
     const result = await pool.query(
-      `INSERT INTO ventas (surtidor_id, empleado_id, litros, precio_unitario, total, tipo_combustible, metodo_pago)
-       VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *`,
-      [surtidor_id, req.user.id, litros, precio_unitario, total, tipo_combustible, metodo_pago || 'efectivo']
+      `INSERT INTO ventas (surtidor_id, empleado_id, litros, precio_unitario, total,
+        tipo_combustible, metodo_pago, metodo_pago_bits, id_binario)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *`,
+      [surtidor_id, req.user.id, litros, precio_unitario, total,
+       tipo_combustible, metodo_pago || 'efectivo', metodoBits, idBinario.toString()]
     );
+
+    // Notificar observadores (stock + alertas)
+    await alertaSubject.notify('venta_registrada', {
+      tipo_combustible, litros, total, surtidor_id
+    });
+
     res.status(201).json({ success: true, data: result.rows[0] });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
