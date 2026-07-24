@@ -49,12 +49,15 @@ app.use((err, req, res, next) => {
   });
 });
 
-// ── Start ────────────────────────────────────────────────────────
-app.listen(PORT, () => {
-  console.log(`\n⛽  Surtidor Valencia → http://localhost:${PORT}`);
-  console.log(`🗄️   Supabase PostgreSQL conectado`);
-  console.log(`👁️   Observer activo: StockObserver, VentaAltaObserver`);
-  console.log(`📅  ${new Date().toLocaleString('es-VE')}\n`);
-});
+// ── Start (solo en local, Vercel usa module.exports) ────────────
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`\n⛽  Surtidor Valencia → http://localhost:${PORT}`);
+    console.log(`🗄️   Supabase PostgreSQL conectado`);
+    console.log(`👁️   Observer activo: StockObserver, VentaAltaObserver`);
+    console.log(`📅  ${new Date().toLocaleString('es-VE')}\n`);
+  });
+}
 
 module.exports = app;
+
