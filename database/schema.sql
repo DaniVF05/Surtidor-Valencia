@@ -81,3 +81,5 @@ INSERT INTO inventario (tipo_combustible, stock_actual, stock_minimo, capacidad_
   ('Gasoil',      30000, 5000, 60000),
   ('GLP',         10000, 1000, 20000)
 ON CONFLICT (tipo_combustible) DO NOTHING;
+metodo_pago_bits text,
+id_binario text
