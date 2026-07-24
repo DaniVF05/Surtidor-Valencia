@@ -607,22 +607,72 @@ function exportarReporte() {
   showToast('Reporte exportado');
 }
 
-// Cerrar modales con Escape
+// ══════════════════════════════════════════════════════════════
+// REABASTECIMIENTO DE INVENTARIO
+// ══════════════════════════════════════════════════════════════
+function abrirModalReabastecer() {
+  document.getElementById('r_combustible').value = 'Gasolina 91';
+  document.getElementById('r_cantidad').value = '';
+  document.getElementById('reabastecerError').textContent = '';
+  document.getElementById('modalReabastecer').style.display = 'flex';
+  setTimeout(() => document.getElementById('r_cantidad').focus(), 100);
+}
+
+function cerrarModalReabastecer() {
+  document.getElementById('modalReabastecer').style.display = 'none';
+}
+
+async function guardarReabastecimiento() {
+  const tipo_combustible = document.getElementById('r_combustible').value;
+  const cantidad = parseFloat(document.getElementById('r_cantidad').value);
+  const errEl = document.getElementById('reabastecerError');
+
+  errEl.textContent = '';
+  if (!cantidad || cantidad <= 0) {
+    errEl.textContent = '⚠ Ingresa una cantidad válida de litros.';
+    return;
+  }
+
+  const btn = document.getElementById('btnGuardarReabastecer');
+  btn.textContent = '⏳ Registrando...';
+  btn.disabled = true;
+
+  const result = await api('/inventario/reabastecimiento', {
+    method: 'POST',
+    body: JSON.stringify({ tipo_combustible, cantidad })
+  });
+
+  btn.textContent = '✓ Registrar Ingreso';
+  btn.disabled = false;
+
+  if (result.success) {
+    cerrarModalReabastecer();
+    showToast(`Se ingresaron ${cantidad} L de ${tipo_combustible} ✅`);
+    // Recargar las vistas para ver el nuevo stock
+    if (getCurrentPage() === 'inventario') loadInventario();
+    dashboard(); 
+  } else {
+    errEl.textContent = '❌ ' + (result.message || 'Error al registrar reabastecimiento');
+  }
+}
+
+// Cerrar modales con Escape o al hacer clic fuera
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
     cerrarModalVenta();
     cerrarModalSurtidor();
     cerrarModalEmpleado();
+    cerrarModalReabastecer();
   }
 });
 
-// Cerrar modal al hacer clic fuera
 document.querySelectorAll('.modal-overlay').forEach(overlay => {
   overlay.addEventListener('click', e => {
     if (e.target === overlay) {
       cerrarModalVenta();
       cerrarModalSurtidor();
       cerrarModalEmpleado();
+      cerrarModalReabastecer();
     }
   });
 });
