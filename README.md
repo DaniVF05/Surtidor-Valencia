@@ -22,19 +22,19 @@
 
 ## 🎨 Prototipo UI — Figma
 
-> Accede al prototipo interactivo de todas las pantallas del sistema:
+Accede al prototipo interactivo de todas las pantallas del sistema:
 
-**🔗 [Ver Prototipo en Figma](FIGMA_LINK_AQUI)**
+🔗 [Ver Prototipo en Figma](https://www.figma.com/design/D4svio4I9ps7eLg1d9eG98/PROTOTIPOGASOLINERA?node-id=0-1&t=grKcUcoOqiM2MaTc-1)
 
 Pantallas incluidas:
-- 🔐 Login
-- 📊 Dashboard principal
-- ⛽ Gestión de surtidores
-- 🧾 Registro de ventas
-- 📦 Control de inventario
-- 🔔 Panel de alertas
-- 📈 Reportes y estadísticas
 
+* 🔐 Login
+* 📊 Dashboard principal
+* ⛽ Gestión de surtidores
+* 🧾 Registro de ventas
+* 📦 Control de inventario
+* 🔔 Panel de alertas
+* 📈 Reportes y estadísticas
 ---
 
 ## 🚀 Características
